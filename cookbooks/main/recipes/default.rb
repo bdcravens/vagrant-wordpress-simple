@@ -18,7 +18,20 @@ package "mysql-server"
 
 package "mysql-client"
 
-execute "mysqladmin -u root -h localhost password 'vagrant'"
+# set MySQL password
+execute "mysqladmin -u root -h localhost password 'vagrant' && touch .mysql_password_set" do
+  action :run
+  user "root"
+  cwd "/opt/files"
+  creates "/opt/files/.mysql_password_set"
+end
+# create database
+execute "mysql -u root -pvagrant -e 'create database wordpress;' && touch .mysql_db_created" do
+  action :run
+  user "root"
+  cwd "/opt/files"
+  creates "/opt/files/.mysql_db_created"
+end
 
 package "php5-mysql"
 
@@ -39,8 +52,6 @@ execute "tar -C /var/site/ -xvzf latest.tar.gz" do
   cwd "/tmp"
 end
 
-# create database
-execute 'mysql -u root -pvagrant -e "create database wordpress;"'
 
 # yes this is VERY BAD
 execute 'chmod 777 /var/site/wordpress'
